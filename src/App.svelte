@@ -34,7 +34,7 @@
   onMount(() => {
     const interval = setInterval(async () => {
       currentTime = await sha256(`${new Date().toString()}`);
-      clearInterval(interval);
+      timeParts = currentTime.match(/.{1,3}/g);
     }, 1000);
 
     return () => {
@@ -42,32 +42,37 @@
     };
   });
 
-  $: currentTime = new Date().toString();
+  $: currentTime = "";
+  $: timeParts = [];
 </script>
 
 <main>
-  <h1>Hello {name}!</h1>
-  <p>
-    Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn
-    how to build Svelte apps.
-  </p>
-
   <p class="hex">{currentTime}</p>
+  <div class="grid">
+    {#each timeParts as timeFragment}
+      <div class="time-block" style="background-color: #{timeFragment}">
+        {timeFragment}
+      </div>
+    {/each}
+  </div>
 </main>
 
 <style>
-  main {
-    text-align: center;
-    padding: 1em;
-    max-width: 640px;
-    margin: 0 auto;
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
   }
 
-  h1 {
-    color: #ff3e00;
-    text-transform: uppercase;
-    font-size: 4em;
-    font-weight: 100;
+  .time-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 1000ms;
+  }
+
+  .grid > div {
+    width: 4vw;
+    height: 4vw;
   }
   .hex {
     overflow-wrap: anywhere;
