@@ -1,8 +1,6 @@
 <script>
   import { onMount } from "svelte";
 
-  export let name;
-
   const convertToHex = (str) => {
     let result = "";
 
@@ -14,7 +12,7 @@
     return result;
   };
 
-  async function sha256(message) {
+  const sha256 = async (message) => {
     // encode as UTF-8
     const msgBuffer = new TextEncoder().encode(message);
 
@@ -29,13 +27,16 @@
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
     return hashHex;
-  }
+  };
 
   onMount(() => {
-    const interval = setInterval(async () => {
+    const createTimeParts = async () => {
       currentTime = await sha256(`${new Date().toString()}`);
       timeParts = currentTime.match(/.{1,3}/g);
-    }, 1000);
+    };
+
+    const interval = setInterval(createTimeParts, 2500);
+    createTimeParts();
 
     return () => {
       clearInterval(interval);
@@ -46,16 +47,13 @@
   $: timeParts = [];
 </script>
 
-<main>
-  <p class="hex">{currentTime}</p>
-  <div class="grid">
-    {#each timeParts as timeFragment}
-      <div class="time-block" style="background-color: #{timeFragment}">
-        {timeFragment}
-      </div>
-    {/each}
-  </div>
-</main>
+<div class="grid">
+  {#each timeParts as timeFragment}
+    <div style="background-color: #{timeFragment}">
+      #{timeFragment}
+    </div>
+  {/each}
+</div>
 
 <style>
   .grid {
@@ -63,18 +61,14 @@
     flex-wrap: wrap;
   }
 
-  .time-block {
+  .grid > div {
     display: flex;
+    width: calc(10vw - 4px);
+    height: calc(10vw - 4px);
+    margin: 2px;
     align-items: center;
     justify-content: center;
-    transition: background-color 1000ms;
-  }
-
-  .grid > div {
-    width: 4vw;
-    height: 4vw;
-  }
-  .hex {
-    overflow-wrap: anywhere;
+    transition: background-color 500ms;
+    border-radius: 10%;
   }
 </style>
